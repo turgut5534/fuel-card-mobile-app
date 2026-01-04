@@ -1,7 +1,7 @@
 import { API_ENDPOINTS } from "@/constants/api";
 import { useAuth } from "@/contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -37,8 +37,8 @@ export default function CardsScreen() {
 
       if (!token) {
         setLoading(false);
-      return; 
-    }
+        return;
+      }
 
       // console.log("Fetching cards with token:", token);
 
@@ -71,11 +71,11 @@ export default function CardsScreen() {
     }
   };
 
-useFocusEffect(
-  useCallback(() => {
-    fetchCards();
-  }, [])
-);
+  useFocusEffect(
+    useCallback(() => {
+      fetchCards();
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -156,15 +156,38 @@ useFocusEffect(
 
   const handleSettings = () => {
     router.push("/settings");
-  }
+  };
 
   const handleAddCard = () => {
     router.push("/add-card");
   };
 
   const getCardColor = (id: number | string) => {
-    const colors = ["#FF3B30", "#34C759", "#007AFF", "#FF9500"];
-    const numericId = typeof id === "string" ? parseInt(id, 10) : id;
+    const colors = [
+      "#FF3B30", // Red
+      "#34C759", // Green
+      "#007AFF", // Blue
+      "#FF9500", // Orange
+      "#AF52DE", // Purple
+      "#5AC8FA", // Teal
+    ];
+
+    let numericId: number;
+
+    // Handle String IDs (UUIDs) by hashing them into a number
+    if (typeof id === "string") {
+      let hash = 0;
+      for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      numericId = Math.abs(hash);
+    } else {
+      numericId = id;
+    }
+
+    // Fallback: If ID is missing, default to Red (index 0)
+    if (!numericId && numericId !== 0) numericId = 0;
+
     return colors[numericId % colors.length];
   };
 
@@ -212,53 +235,55 @@ useFocusEffect(
     );
   }
 
-return (
-  <View style={styles.container}>
-    {/* Top Bar */}
-    <View style={styles.topBar}>
-      <TouchableOpacity style={styles.settingsButton} onPress={handleSettings}>
-        <Text style={styles.settingsText}>Settings</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
-    </View>
-
-    {/* Main Content */}
-    <Text style={styles.title}>💳 My Fuel Cards</Text>
-    <Text style={styles.subtitle}>Choose a card to make a transaction</Text>
-
-    {cards.length === 0 ? (
-      <View style={styles.listContainer}>
+  return (
+    <View style={styles.container}>
+      {/* Top Bar */}
+      <View style={styles.topBar}>
         <TouchableOpacity
-          style={styles.addCard}
-          onPress={handleAddCard}
-          activeOpacity={0.7}
+          style={styles.settingsButton}
+          onPress={handleSettings}
         >
-          <Text style={styles.addCardIcon}>+</Text>
-          <Text style={styles.addCardText}>Add Card</Text>
+          <Text style={styles.settingsText}>Settings</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
-    ) : (
-      <FlatList
-        data={cards}
-        renderItem={renderCard}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        ListFooterComponent={renderFooter}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#007AFF"
-          />
-        }
-      />
-    )}
-  </View>
-);
 
+      {/* Main Content */}
+      <Text style={styles.title}>💳 My Fuel Cards</Text>
+      <Text style={styles.subtitle}>Choose a card to make a transaction</Text>
+
+      {cards.length === 0 ? (
+        <View style={styles.listContainer}>
+          <TouchableOpacity
+            style={styles.addCard}
+            onPress={handleAddCard}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.addCardIcon}>+</Text>
+            <Text style={styles.addCardText}>Add Card</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={cards}
+          renderItem={renderCard}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          ListFooterComponent={renderFooter}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#007AFF"
+            />
+          }
+        />
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
