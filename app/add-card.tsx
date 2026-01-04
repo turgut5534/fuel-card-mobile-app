@@ -50,6 +50,7 @@ export default function AddCardScreen() {
       });
 
       const data = await response.json();
+      console.log('Create Card Response:', data);
 
       if (response.ok) {
         Alert.alert('Success', 'Card created successfully!', [

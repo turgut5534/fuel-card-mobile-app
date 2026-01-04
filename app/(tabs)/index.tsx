@@ -150,6 +150,10 @@ export default function CardsScreen() {
     ]);
   };
 
+  const handleSettings = () => {
+    router.push("/settings");
+  }
+
   const handleAddCard = () => {
     router.push("/add-card");
   };
@@ -204,63 +208,97 @@ export default function CardsScreen() {
     );
   }
 
-  return (
-    <View style={styles.container}>
+return (
+  <View style={styles.container}>
+    {/* Top Bar */}
+    <View style={styles.topBar}>
+      <TouchableOpacity style={styles.settingsButton} onPress={handleSettings}>
+        <Text style={styles.settingsText}>Settings</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
-
-      <Text style={styles.title}>💳 My Fuel Cards</Text>
-      <Text style={styles.subtitle}>Choose a card to make a transaction</Text>
-
-      {cards.length === 0 ? (
-        <View style={styles.listContainer}>
-          <TouchableOpacity
-            style={styles.addCard}
-            onPress={handleAddCard}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.addCardIcon}>+</Text>
-            <Text style={styles.addCardText}>Add Card</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <FlatList
-          data={cards}
-          renderItem={renderCard}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.listContainer}
-          ListFooterComponent={renderFooter}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#007AFF"
-            />
-          }
-        />
-      )}
     </View>
-  );
+
+    {/* Main Content */}
+    <Text style={styles.title}>💳 My Fuel Cards</Text>
+    <Text style={styles.subtitle}>Choose a card to make a transaction</Text>
+
+    {cards.length === 0 ? (
+      <View style={styles.listContainer}>
+        <TouchableOpacity
+          style={styles.addCard}
+          onPress={handleAddCard}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.addCardIcon}>+</Text>
+          <Text style={styles.addCardText}>Add Card</Text>
+        </TouchableOpacity>
+      </View>
+    ) : (
+      <FlatList
+        data={cards}
+        renderItem={renderCard}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContainer}
+        ListFooterComponent={renderFooter}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#007AFF"
+          />
+        }
+      />
+    )}
+  </View>
+);
+
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
+    paddingTop: 20, // push main content slightly down
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#000",
+    paddingHorizontal: 24,
+    paddingTop: 40, // top padding for status bar
+    paddingBottom: 10,
+  },
+  logoutButton: {
+    backgroundColor: "#FF3B30", // red logout
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  logoutText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  settingsButton: {
+    backgroundColor: "#007AFF", // blue settings
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  settingsText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 20, // space below top bar
     paddingBottom: 8,
   },
   subtitle: {
@@ -270,8 +308,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   listContainer: {
-    padding: 24,
-    paddingTop: 0,
+    paddingHorizontal: 24, // keep sides same
+    paddingBottom: 24,
   },
   card: {
     borderRadius: 16,
@@ -360,19 +398,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  logoutButton: {
-    position: "absolute",
-    top: 50, // adjust for your status bar
-    right: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "#FF3B30", // red logout
-    borderRadius: 8,
-    zIndex: 10,
-  },
-  logoutText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
   },
 });
