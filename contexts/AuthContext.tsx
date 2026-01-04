@@ -1,6 +1,6 @@
+import { API_ENDPOINTS } from '@/constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
   userToken: string | null;
@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (token) {
         // Verify with backend
-        const response = await fetch('http://192.168.0.10:3000/cards', {
+        const response = await fetch(API_ENDPOINTS.CARDS, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
