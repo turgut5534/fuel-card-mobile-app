@@ -40,7 +40,7 @@ export default function CardsScreen() {
       return; 
     }
 
-      console.log("Fetching cards with token:", token);
+      // console.log("Fetching cards with token:", token);
 
       const response = await fetch(API_ENDPOINTS.CARDS, {
         method: "GET",

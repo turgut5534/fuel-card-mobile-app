@@ -4,16 +4,26 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 function RootLayoutNav() {
-  const { userToken, isLoading } = useAuth();
+  const { userToken, isLoading, checkAuth } = useAuth(); // Get checkAuth
   const segments = useSegments();
   const router = useRouter();
 
+  // 1. Navigation Listener: Check auth silently whenever the route changes
   useEffect(() => {
+    if (isLoading) return;
 
+    // Check auth silently (pass true) so we don't show the spinner
+    // If the token is invalid, checkAuth will set userToken to null...
+    checkAuth(true); 
+  }, [segments]); // Runs every time you navigate
+
+  // 2. Protection Logic: Reacts to changes in userToken
+  useEffect(() => {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
+    // ...which triggers this redirect automatically
     if (!userToken && !inAuthGroup) {
       router.replace('/(auth)/login');
     } else if (userToken && inAuthGroup) {
