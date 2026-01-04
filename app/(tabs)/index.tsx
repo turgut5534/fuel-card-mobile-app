@@ -1,98 +1,378 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useAuth } from "@/contexts/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+interface FuelCard {
+  id: number;
+  balance: number;
+  name: string;
+}
 
-export default function HomeScreen() {
+const SELECTED_CARD_KEY = "@selected_card";
+
+export default function CardsScreen() {
+  const [cards, setCards] = useState<FuelCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const { signOut } = useAuth();
+
+  const fetchCards = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      if (!token) {
+        setLoading(false);
+      return; 
+    }
+
+      console.log("Fetching cards with token:", token);
+
+      const response = await fetch("http://192.168.0.10:3000/cards", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const mapped = data.map((c: any) => ({
+          id: c.id,
+          name: c.card_name,
+          balance: parseFloat(c.balance),
+        }));
+        setCards(mapped);
+        setError("");
+      } else {
+        setError("Failed to load cards");
+      }
+    } catch (e) {
+      console.error("Error fetching cards:", e);
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchCards();
+  };
+  // Inside CardsScreen.tsx
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // 1. Clear the storage
+            // await AsyncStorage.removeItem("userToken");
+            await signOut();
+
+            // router.replace("/(auth)/login");
+          } catch (err) {
+            console.error("Error logging out", err);
+          }
+        },
+      },
+    ]);
+  };
+  const handleCardPress = async (card: FuelCard) => {
+    await AsyncStorage.setItem(SELECTED_CARD_KEY, JSON.stringify(card));
+    router.push("/details");
+  };
+
+  const handleDeleteCard = async (cardId: number) => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+
+      const response = await fetch(`http://192.168.0.10:3000/cards/${cardId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        setCards((prev) => prev.filter((c) => c.id !== cardId));
+      } else {
+        Alert.alert("Error", "Failed to delete card");
+      }
+    } catch (err) {
+      console.error("Error deleting card", err);
+      Alert.alert("Error", "Cannot connect to the server");
+    }
+  };
+
+  const handleLongPress = (card: FuelCard) => {
+    Alert.alert("Card Options", "What would you like to do?", [
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          Alert.alert(
+            "Delete Card",
+            `Are you sure you want to delete "${card.name}"?`,
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Delete",
+                style: "destructive",
+                onPress: () => handleDeleteCard(card.id),
+              },
+            ]
+          );
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const handleAddCard = () => {
+    router.push("/add-card");
+  };
+
+  const getCardColor = (id: number | string) => {
+    const colors = ["#FF3B30", "#34C759", "#007AFF", "#FF9500"];
+    const numericId = typeof id === "string" ? parseInt(id, 10) : id;
+    return colors[numericId % colors.length];
+  };
+
+  const renderCard = ({ item }: { item: FuelCard }) => (
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: getCardColor(item.id) }]}
+      onPress={() => handleCardPress(item)}
+      onLongPress={() => handleLongPress(item)}
+      activeOpacity={0.8}
+    >
+      <Text style={styles.cardName}>{item.name}</Text>
+      <Text style={styles.balanceLabel}>Balance</Text>
+      <Text style={styles.balance}>
+        {typeof item.balance === "number"
+          ? item.balance.toFixed(2)
+          : parseFloat(item.balance || "0").toFixed(2)}{" "}
+        zł
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const renderFooter = () => (
+    <TouchableOpacity style={styles.addButton} onPress={handleAddCard}>
+      <Text style={styles.addButtonIcon}>+</Text>
+      <Text style={styles.addButtonText}>Add a New Card</Text>
+    </TouchableOpacity>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (error && cards.length === 0) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchCards}>
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <Text style={styles.title}>💳 My Fuel Cards</Text>
+      <Text style={styles.subtitle}>Choose a card to make a transaction</Text>
+
+      {cards.length === 0 ? (
+        <View style={styles.listContainer}>
+          <TouchableOpacity
+            style={styles.addCard}
+            onPress={handleAddCard}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.addCardIcon}>+</Text>
+            <Text style={styles.addCardText}>Add Card</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={cards}
+          renderItem={renderCard}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContainer}
+          ListFooterComponent={renderFooter}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#007AFF"
+            />
+          }
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
   },
-  stepContainer: {
-    gap: 8,
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#fff",
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+  },
+  listContainer: {
+    padding: 24,
+    paddingTop: 0,
+  },
+  card: {
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  cardName: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 12,
+  },
+  balanceLabel: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    marginBottom: 4,
+  },
+  balance: {
+    fontSize: 32,
+    color: "#fff",
+    fontWeight: "700",
+  },
+  addCard: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 16,
+    padding: 40,
+    borderWidth: 2,
+    borderColor: "#007AFF",
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 120,
+  },
+  addCardIcon: {
+    fontSize: 48,
+    color: "#007AFF",
+    fontWeight: "300",
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  addCardText: {
+    fontSize: 18,
+    color: "#007AFF",
+    fontWeight: "600",
+  },
+  addButton: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 8,
+    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  addButtonIcon: {
+    fontSize: 24,
+    color: "#34C759",
+    fontWeight: "bold",
+    marginRight: 12,
+  },
+  addButtonText: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#FF453A",
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  logoutButton: {
+    position: "absolute",
+    top: 50, // adjust for your status bar
+    right: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#FF3B30", // red logout
+    borderRadius: 8,
+    zIndex: 10,
+  },
+  logoutText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
