@@ -1,8 +1,9 @@
 import { API_ENDPOINTS } from "@/constants/api";
 import { useAuth } from "@/contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -70,9 +71,11 @@ export default function CardsScreen() {
     }
   };
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     fetchCards();
-  }, []);
+  }, [])
+);
 
   const onRefresh = () => {
     setRefreshing(true);

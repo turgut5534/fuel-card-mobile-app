@@ -1,7 +1,8 @@
 import { API_ENDPOINTS } from "@/constants/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -106,9 +107,11 @@ export default function CardDetailsScreen() {
     setHistory((prev) => [newHistoryItem, ...prev]);
   };
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     const loadData = async () => {
       try {
+        setLoading(true); // Add this to show loading state
         const storedCardData = await AsyncStorage.getItem(SELECTED_CARD_KEY);
 
         if (!storedCardData) {
@@ -136,7 +139,6 @@ export default function CardDetailsScreen() {
 
         const data = await historyItemsRes.json();
 
-        // Safely parse latestFuelPrice
         if (
           data.latestFuelPrice !== undefined &&
           data.latestFuelPrice !== null
@@ -153,7 +155,6 @@ export default function CardDetailsScreen() {
           setFuelType(FuelType.DIESEL);
         }
 
-        // Safely map transactions
         if (Array.isArray(data.transactions)) {
           const mappedHistory: HistoryItem[] = data.transactions.map(
             (item: any) => ({
@@ -184,8 +185,10 @@ export default function CardDetailsScreen() {
         setLoading(false);
       }
     };
+    
     loadData();
-  }, []);
+  }, [])
+);
 
   const handleSubtract = async () => {
     const value = parseFloat(inputValue);
