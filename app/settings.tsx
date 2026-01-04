@@ -62,7 +62,7 @@ const SettingsScreen = () => {
       const token = await AsyncStorage.getItem("userToken");
 
       const response = await fetch(
-        "http://192.168.0.10:3000/auth/changePassword",
+        API_ENDPOINTS.CHANGE_PASSWORD,
         {
           method: "POST",
           headers: {
