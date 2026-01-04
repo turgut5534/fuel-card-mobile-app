@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // await AsyncStorage.removeItem('userToken');
+
         const token = await AsyncStorage.getItem('userToken');
 
         console.log('Checking auth with token:', token);
@@ -37,6 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await AsyncStorage.removeItem('userToken');
             setUserToken(null);
           }
+        } else {
+          setUserToken(null);
         }
       } catch (e) {
         console.error('Failed to verify token', e);
