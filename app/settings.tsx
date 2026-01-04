@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/constants/api";
 import { useAuth } from "@/contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -30,7 +31,7 @@ const SettingsScreen = () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
 
-        const profile = await fetch("http://192.168.0.10:3000/auth/profile", {
+        const profile = await fetch(API_ENDPOINTS.PROFILE, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,

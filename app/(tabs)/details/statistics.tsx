@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
@@ -51,7 +52,7 @@ export default function CardStatsScreen() {
 
       const cardData: CardData = JSON.parse(storedCardData);
 
-      let url = `http://192.168.0.10:3000/cards/${cardData.id}/summary`;
+      let url = `${API_ENDPOINTS.CARDS}/${cardData.id}/summary`;
 
       if (startDate && endDate) {
         // Normalize start and end dates

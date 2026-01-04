@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { API_ENDPOINTS } from "@/constants/api";
 import {
   ActivityIndicator,
   FlatList,
@@ -77,7 +78,7 @@ export default function HistoryTab() {
       const token = await AsyncStorage.getItem("userToken");
 
       const historyItemsRes = await fetch(
-        `http://192.168.0.10:3000/cards/${cardData.id}/transactions`,
+        `${API_ENDPOINTS.CARDS}/${cardData.id}/transactions`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/constants/api';
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -34,7 +35,7 @@ export default function LoginScreen() {
     setError("");
 
     try {
-      const response = await fetch("http://192.168.0.10:3000/auth/login", {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/constants/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -124,7 +125,7 @@ export default function CardDetailsScreen() {
         const token = await AsyncStorage.getItem("userToken");
 
         const historyItemsRes = await fetch(
-          `http://192.168.0.10:3000/cards/${cardData.id}/transactions`,
+          `${API_ENDPOINTS.CARDS}/${cardData.id}/transactions`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -215,7 +216,7 @@ export default function CardDetailsScreen() {
               const token = await AsyncStorage.getItem("userToken");
 
               const response = await fetch(
-                `http://192.168.0.10:3000/cards/${cardId}/spend`,
+                `${API_ENDPOINTS.CARDS}/${cardId}/spend`,
                 {
                   method: "POST",
                   headers: {
@@ -279,7 +280,7 @@ export default function CardDetailsScreen() {
               const token = await AsyncStorage.getItem("userToken");
 
               const response = await fetch(
-                `http://192.168.0.10:3000/cards/${cardId}/topup`,
+                `${API_ENDPOINTS.CARDS}/${cardId}/topup`,
                 {
                   method: "POST",
                   headers: {

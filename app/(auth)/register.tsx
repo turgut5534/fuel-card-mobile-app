@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/constants/api';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -36,7 +37,7 @@ export default function RegisterScreen() {
     setError("");
 
     try {
-      const response = await fetch("http://192.168.0.10:3000/auth/register", {
+      const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, repeatPassword }),

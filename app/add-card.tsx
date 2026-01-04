@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -37,7 +38,7 @@ export default function AddCardScreen() {
     try {
       const token = await AsyncStorage.getItem('userToken');
 
-      const response = await fetch('http://192.168.0.10:3000/cards', {
+      const response = await fetch(API_ENDPOINTS.CARDS, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
