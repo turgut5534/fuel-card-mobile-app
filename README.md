@@ -60,17 +60,9 @@ npm install
 
 3. Start the Metro bundler
 ```
-npx react-native start
+npx expo start
 ```
 
-4. Run the app on Android:
-```
-npx react-native run-android
-```
-
-Or on IOS
-```
-npx react-native run-ios
 ```
 
 Usage
