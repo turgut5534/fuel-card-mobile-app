@@ -49,7 +49,7 @@ Features
 1. Clone the repository:
 
 ```
-git clone https://github.com/turgut5534/amic-card-app-master.git
+git clone https://github.com/turgut5534/fuel-card-mobile-app.git
 cd fuel-card-manager
 ```
 
