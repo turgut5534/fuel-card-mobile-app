@@ -1,50 +1,137 @@
-# Welcome to your Expo app 👋
+Fuel Card Manager App
+=====================
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A **React Native +Expo** mobile application to manage personal fuel cards, track balances, and record transactions. This app interacts with custom APIs from my backend project to fetch and update data.
 
-## Get started
+Features
+--------
 
-1. Install dependencies
+*   **Card Management**:
+    
+    *   Add, view, and manage multiple fuel cards.
+        
+    *   View card balances on the main screen.
+        
+*   **Transactions**:
+    
+    *   Top up or spend funds from a selected card.
+        
+    *   Auto-calculate fuel price per liter based on the last transaction.
+        
+    *   Save transactions with details like amount, fuel price, and liters.
+        
+*   **Transaction History**:
+    
+    *   View all past transactions.
+        
+    *   Filter transactions by type: “Top Ups” or “Spents”.
+        
+*   **Analytics**:
+    
+    *   View total amounts of transactions.
+        
+    *   Filter totals by specific date ranges.
 
-   ```bash
-   npm install
-   ```
 
-2. Start the app
+ Installation
+------------
 
-   ```bash
-   npx expo start
-   ```
+### Prerequisites
 
-In the output, you'll find options to open the app in a
+*   Node.js (v14+)
+    
+*   React Native CLI
+    
+*   Android Studio / Xcode for device emulation
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Steps
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+1. Clone the repository:
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+git clone https://github.com/turgut5534/amic-card-app-master.git
+cd fuel-card-manager
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Install dependencies:
+```
+npm install
+```
 
-## Learn more
+3. Start the Metro bundler
+```
+npx react-native start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+4. Run the app on Android:
+```
+npx react-native run-android
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Or on IOS
+```
+npx react-native run-ios
+```
 
-## Join the community
+Usage
+-----
 
-Join our community of developers creating universal apps.
+1.  **Add Fuel Cards**: Navigate to the main screen and add your fuel cards.
+    
+2.  **View Balances**: Check the balance of each card at a glance.
+    
+3.  **Top Up / Spend**:
+    
+    *   Select a card.
+        
+    *   Enter the amount to top up or spend.
+        
+    *   Fuel price will appear based on the last transaction.
+        
+    *   Hit **Top Up** or **Spend** to update the balance and save the transaction.
+        
+4.  **Transaction History & Filters**:
+    
+    *   Navigate to the transactions screen.
+        
+    *   Filter by “Top Ups” or “Spents”.
+        
+    *   View transaction totals and filter by date ranges.
+        
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Architecture / Technologies
+---------------------------
+
+*   **Frontend**: React Native
+    
+*   **State Management**: React Hooks / Context API (or Redux if applicable)
+    
+*   **API Integration**: Fetches data from custom backend APIs
+    
+*   **Data Storage**: Remote via API (or optionally AsyncStorage for offline cache)
+    
+*   **Navigation**: React Navigation
+    
+
+Future Improvements
+-------------------
+
+*   Offline mode with local caching.
+    
+*   Push notifications for low balances.
+    
+*   Multi-currency support.
+    
+*   Charts for fuel consumption trends.
+    
+
+Contributing
+------------
+
+This project is primarily for personal use, but contributions are welcome via pull requests.
+
+License
+-------
+
+MIT License © Turgut Salgın
+
